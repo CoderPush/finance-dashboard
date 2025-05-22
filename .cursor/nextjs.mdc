@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+we are on nextjs 15 and using server-side rendering and server-side component so make sure you reference to latest practices, not using older nextjs practices where applicable.
