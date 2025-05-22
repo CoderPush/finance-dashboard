@@ -27,7 +27,7 @@ export const signInAction = async (formData: FormData) => {
   const { error } = await supabase.auth.signInWithOtp({ email });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return encodedRedirect("error", "/", error.message);
   }
 
   return encodedRedirect(
@@ -40,5 +40,5 @@ export const signInAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };
