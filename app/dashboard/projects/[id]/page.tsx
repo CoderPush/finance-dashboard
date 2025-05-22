@@ -6,12 +6,14 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
+  const { id } = await params;
   const supabase = await createClient();
-  const projectId = await params.id;
+  const projectId = id;
+
 
   // Fetch project by id, including client info
   const { data: project } = await supabase

@@ -4,13 +4,10 @@ import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-interface PageProps {
-  params: { id: string };
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
-  const clientId = params.id;
+  const clientId = id;
 
   // Fetch client by id
   const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();

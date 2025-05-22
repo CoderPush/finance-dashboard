@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page({ searchParams }: { searchParams?: Record<string, any> }) {
+export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, any>> }) {
   const supabase = await createClient();
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const email = resolvedSearchParams?.email || '';

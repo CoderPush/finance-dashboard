@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { MonthProjectFilter } from './MonthProjectFilter';
 import { SalaryTableWithDuplicate } from './SalaryTableWithDuplicate';
 
-export default async function Page({ searchParams }: { searchParams?: Record<string, any> }) {
+export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, any>> }) {
   const supabase = await createClient();
 
   // Fetch all months and projects for the filter dropdowns

@@ -6,7 +6,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '@/components/ui/s
 import { Button } from '@/components/ui/button';
 import { createInvoice } from './actions';
 
-export default async function Page({ searchParams }: { searchParams?: Record<string, any> }) {
+export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, any>> }) {
   const supabase = await createClient();
 
   // Fetch months and projects for the filter
