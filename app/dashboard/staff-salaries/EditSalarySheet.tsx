@@ -5,6 +5,9 @@ import * as React from 'react';
 import { useRef } from 'react';
 import { toast } from '@/components/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export function EditSalarySheet({ open, onOpenChange, salary, months, updateSalaryAction }: {
   open: boolean;
@@ -20,7 +23,6 @@ export function EditSalarySheet({ open, onOpenChange, salary, months, updateSala
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const result = await updateSalaryAction(formData);
-    console.log('updateSalaryAction result:', result);
     if (result?.success) {
       toast({ title: 'Success', description: 'Salary updated successfully!' });
       onOpenChange(false);
@@ -32,7 +34,7 @@ export function EditSalarySheet({ open, onOpenChange, salary, months, updateSala
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-md">
+      <SheetContent side="right" className="w-full max-w-md overflow-y-auto">
         <SheetTitle>Edit Staff Salary</SheetTitle>
         {salary && (
           <form
@@ -42,28 +44,45 @@ export function EditSalarySheet({ open, onOpenChange, salary, months, updateSala
           >
             {/* Staff name (read-only) */}
             <div>
-              <label className="block font-medium">Staff</label>
+              <Label>Staff</Label>
               <div className="border rounded px-2 py-1 bg-muted">
                 {salary.staff?.full_name || salary.staff_id}
               </div>
             </div>
             <input type="hidden" name="id" value={salary.id} />
-            <label className="block font-medium">Month</label>
-            <select name="month_id" defaultValue={salary.month_id} className="border rounded px-2 py-1">
-              {months.map((m: any) => (
-                <option key={m.id} value={m.id}>{m.month_start}</option>
-              ))}
-            </select>
-            <label className="block font-medium">Gross Salary (VND)</label>
-            <input name="gross_salary_vnd" type="number" defaultValue={salary.gross_salary_vnd} className="border rounded px-2 py-1" />
-            <label className="block font-medium">Approved Salary (VND)</label>
-            <input name="approved_salary_vnd" type="number" defaultValue={salary.approved_salary_vnd} className="border rounded px-2 py-1" />
-            <label className="block font-medium">Gross Salary (USD)</label>
-            <input name="gross_salary_usd" type="number" defaultValue={salary.gross_salary_usd} className="border rounded px-2 py-1" />
-            <label className="block font-medium">Approved Salary (USD)</label>
-            <input name="approved_salary_usd" type="number" defaultValue={salary.approved_salary_usd} className="border rounded px-2 py-1" />
-            <label className="block font-medium">Approved Salary USD Equiv</label>
-            <input name="approved_salary_usd_equiv" type="number" defaultValue={salary.approved_salary_usd_equiv} className="border rounded px-2 py-1" />
+            <Label htmlFor="month_id">Month</Label>
+            <Select name="month_id"defaultValue={salary.month_id?.toString()}>
+              <SelectTrigger id="month_id" className="border rounded px-2 py-1">
+                <SelectValue placeholder="Select month" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((m: any) => (
+                  <SelectItem key={m.id} value={m.id.toString()}>{m.month_start}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-2 w-1/2">
+                <Label htmlFor="gross_salary_vnd">Gross Salary (VND)</Label>
+                <Input id="gross_salary_vnd" name="gross_salary_vnd" type="number" defaultValue={salary.gross_salary_vnd} />
+              </div>
+              <div className="flex flex-col gap-2 w-1/2">
+                <Label htmlFor="approved_salary_vnd">Approved Salary (VND)</Label>
+                <Input id="approved_salary_vnd" name="approved_salary_vnd" type="number" defaultValue={salary.approved_salary_vnd} />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-2 w-1/2">
+                <Label htmlFor="gross_salary_usd">Gross Salary (USD)</Label>
+                <Input id="gross_salary_usd" name="gross_salary_usd" type="number" defaultValue={salary.gross_salary_usd} />
+              </div>
+              <div className="flex flex-col gap-2 w-1/2">
+                <Label htmlFor="approved_salary_usd">Approved Salary (USD)</Label>
+                <Input id="approved_salary_usd" name="approved_salary_usd" type="number" defaultValue={salary.approved_salary_usd} />
+              </div>
+            </div>
+            <Label htmlFor="approved_salary_usd_equiv">Approved Salary USD Equiv</Label>
+            <Input id="approved_salary_usd_equiv" name="approved_salary_usd_equiv" type="number" defaultValue={salary.approved_salary_usd_equiv} />
             <Button type="submit" className="w-full">Save</Button>
           </form>
         )}

@@ -149,8 +149,8 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
             <tr>
               <th className="px-4 py-2"><input type="checkbox" checked={allSelected} onChange={toggleSelectAll} /></th>
               <th className="px-4 py-2 text-left font-semibold">ID</th>
-              <th className="px-4 py-2 text-left font-semibold">Staff</th>
-              <th className="px-4 py-2 text-left font-semibold">Project</th>
+              <th className="px-4 py-2 text-left font-semibold min-w-[10rem]">Staff</th>
+              <th className="px-4 py-2 text-left font-semibold min-w-[10rem]">Project</th>
               <th className="px-4 py-2 text-left font-semibold">Month</th>
               <th className="px-4 py-2 text-left font-semibold">Gross Salary (VND)</th>
               <th className="px-4 py-2 text-left font-semibold">Approved Salary (VND)</th>
