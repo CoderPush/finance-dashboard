@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   if (!hash) {
-    return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent("Missing magic link hash.")}`);
+    return NextResponse.redirect(`${origin}/?error=${encodeURIComponent("Missing magic link hash.")}`);
   }
 
   const { error } = await supabase.auth.verifyOtp({
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     type: "email",
   });
   if (error) {
-    return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent(error.message)}`);
+    return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(error.message)}`);
   }
 
 

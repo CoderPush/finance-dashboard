@@ -1,12 +1,25 @@
 "use client";
 import { useState } from 'react';
-import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { duplicateSalaries } from './actions/duplicateSalaries';
 import { checkDuplicates } from './actions/checkDuplicates';
+import { updateSalary} from './actions/updateSalary';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from '@/components/ui/pagination';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { EditSalarySheet } from './EditSalarySheet';
+import { toast } from '@/components/hooks/use-toast';
 
-export function SalaryTableWithDuplicate({ salaries, months, projects }: { salaries: any[]; months: any[]; projects: any[] }) {
+export function SalaryTableWithDuplicate({ salaries, months, projects, page, pageSize, totalCount }: { salaries: any[]; months: any[]; projects: any[]; page: number; pageSize: number; totalCount: number }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [targetMonth, setTargetMonth] = useState('');
@@ -14,8 +27,22 @@ export function SalaryTableWithDuplicate({ salaries, months, projects }: { salar
   const [toCreate, setToCreate] = useState<any[]>([]);
   const [checked, setChecked] = useState(false); // confirmation checkbox
   const [loading, setLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSalary, setEditSalary] = useState<any>(null);
   const allIds = salaries.map((s) => String(s.id));
   const allSelected = selected.length === allIds.length && allIds.length > 0;
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Page size options
+  const pageSizeOptions = [10, 20, 50, 100];
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('pageSize', e.target.value);
+    params.set('page', '1'); // Reset to first page
+    window.location.search = params.toString();
+  };
 
   function toggleSelect(id: string) {
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
@@ -51,9 +78,14 @@ export function SalaryTableWithDuplicate({ salaries, months, projects }: { salar
   async function handleDuplicate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!targetMonth || selected.length === 0 || !toCreate.length || !checked) return;
-    await duplicateSalaries(selected, targetMonth);
-    closeModal();
-    window.location.reload();
+    try {
+      await duplicateSalaries(selected, targetMonth);
+      toast({ title: 'Success', description: 'Salaries duplicated successfully!' });
+      closeModal();
+      router.refresh();
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to duplicate salaries.' });
+    }
   }
 
   return (
@@ -126,6 +158,7 @@ export function SalaryTableWithDuplicate({ salaries, months, projects }: { salar
               <th className="px-4 py-2 text-left font-semibold">Approved Salary (USD)</th>
               <th className="px-4 py-2 text-left font-semibold">Approved Salary USD Equiv</th>
               <th className="px-4 py-2 text-left font-semibold">Created At</th>
+              <th className="px-4 py-2 text-left font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -164,11 +197,121 @@ export function SalaryTableWithDuplicate({ salaries, months, projects }: { salar
                 <td className="px-4 py-2">{salary.approved_salary_usd}</td>
                 <td className="px-4 py-2">{salary.approved_salary_usd_equiv}</td>
                 <td className="px-4 py-2">{salary.created_at ? new Date(salary.created_at).toISOString().slice(0, 10) : '-'}</td>
+                <td className="px-4 py-2">
+                  <Button size="sm" variant="outline" onClick={() => { setEditSalary(salary); setEditOpen(true); }}>Edit</Button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {/* Edit Sheet */}
+      <EditSalarySheet open={editOpen} onOpenChange={setEditOpen} salary={editSalary} months={months} updateSalaryAction={updateSalary as (formData: FormData) => Promise<{ success: boolean; error?: string }>} />
+      {/* Results summary and page size selection */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 my-2">
+        <span className="text-sm text-muted-foreground">
+          Showing {salaries.length > 0 ? ((page - 1) * pageSize + 1) : 0}
+          –{((page - 1) * pageSize) + salaries.length} of {totalCount} results
+        </span>
+        <div className="flex items-center gap-2">
+          <label htmlFor="pageSize" className="text-sm">Rows per page:</label>
+          <select
+            id="pageSize"
+            className="border rounded px-2 py-1 text-sm"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            {pageSizeOptions.map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {/* Pagination UI using shadcn */}
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href={(() => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('page', String(page - 1));
+                return `?${params.toString()}`;
+              })()}
+              aria-disabled={page <= 1}
+              tabIndex={page <= 1 ? -1 : 0}
+              style={page <= 1 ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+            />
+          </PaginationItem>
+          {/* Page numbers logic */}
+          {(() => {
+            const pageCount = Math.ceil(totalCount / pageSize);
+            const items = [];
+            const maxPageButtons = 5;
+            let start = Math.max(1, page - 2);
+            let end = Math.min(pageCount, page + 2);
+            if (end - start < maxPageButtons - 1) {
+              if (start === 1) {
+                end = Math.min(pageCount, start + maxPageButtons - 1);
+              } else if (end === pageCount) {
+                start = Math.max(1, end - maxPageButtons + 1);
+              }
+            }
+            if (start > 1) {
+              items.push(
+                <PaginationItem key={1}>
+                  <PaginationLink href={`?${(() => { const params = new URLSearchParams(searchParams.toString()); params.set('page', '1'); return params.toString(); })()}`}>1</PaginationLink>
+                </PaginationItem>
+              );
+              if (start > 2) {
+                items.push(
+                  <PaginationItem key="start-ellipsis">
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+            }
+            for (let i = start; i <= end; i++) {
+              items.push(
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    href={`?${(() => { const params = new URLSearchParams(searchParams.toString()); params.set('page', String(i)); return params.toString(); })()}`}
+                    isActive={i === page}
+                  >
+                    {i}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            }
+            if (end < pageCount) {
+              if (end < pageCount - 1) {
+                items.push(
+                  <PaginationItem key="end-ellipsis">
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+              items.push(
+                <PaginationItem key={pageCount}>
+                  <PaginationLink href={`?${(() => { const params = new URLSearchParams(searchParams.toString()); params.set('page', String(pageCount)); return params.toString(); })()}`}>{pageCount}</PaginationLink>
+                </PaginationItem>
+              );
+            }
+            return items;
+          })()}
+          <PaginationItem>
+            <PaginationNext
+              href={(() => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('page', String(page + 1));
+                return `?${params.toString()}`;
+              })()}
+              aria-disabled={page * pageSize >= totalCount}
+              tabIndex={page * pageSize >= totalCount ? -1 : 0}
+              style={page * pageSize >= totalCount ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 } 
