@@ -15,8 +15,9 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from '@/components/ui/pagination';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { EditSalarySheet } from './EditSalarySheet';
+import { toast } from '@/components/hooks/use-toast';
 
 export function SalaryTableWithDuplicate({ salaries, months, projects, page, pageSize, totalCount }: { salaries: any[]; months: any[]; projects: any[]; page: number; pageSize: number; totalCount: number }) {
   const [selected, setSelected] = useState<string[]>([]);
@@ -32,6 +33,7 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
   const allSelected = selected.length === allIds.length && allIds.length > 0;
 
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Page size options
   const pageSizeOptions = [10, 20, 50, 100];
@@ -76,9 +78,14 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
   async function handleDuplicate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!targetMonth || selected.length === 0 || !toCreate.length || !checked) return;
-    await duplicateSalaries(selected, targetMonth);
-    closeModal();
-    window.location.reload();
+    try {
+      await duplicateSalaries(selected, targetMonth);
+      toast({ title: 'Success', description: 'Salaries duplicated successfully!' });
+      closeModal();
+      router.refresh();
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to duplicate salaries.' });
+    }
   }
 
   return (
