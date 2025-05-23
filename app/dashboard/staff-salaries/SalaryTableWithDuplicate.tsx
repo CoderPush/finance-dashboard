@@ -18,6 +18,14 @@ import {
 import { useSearchParams, useRouter } from 'next/navigation';
 import { EditSalarySheet } from './EditSalarySheet';
 import { toast } from '@/components/hooks/use-toast';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 
 export function SalaryTableWithDuplicate({ salaries, months, projects, page, pageSize, totalCount }: { salaries: any[]; months: any[]; projects: any[]; page: number; pageSize: number; totalCount: number }) {
   const [selected, setSelected] = useState<string[]>([]);
@@ -144,35 +152,35 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
         </SheetContent>
       </Sheet>
       <div className="w-full overflow-x-auto rounded border bg-background mt-2">
-        <table className="w-full min-w-full text-sm">
-          <thead className="bg-muted">
-            <tr>
-              <th className="px-4 py-2"><input type="checkbox" checked={allSelected} onChange={toggleSelectAll} /></th>
-              <th className="px-4 py-2 text-left font-semibold">ID</th>
-              <th className="px-4 py-2 text-left font-semibold min-w-[10rem]">Staff</th>
-              <th className="px-4 py-2 text-left font-semibold min-w-[10rem]">Project</th>
-              <th className="px-4 py-2 text-left font-semibold">Month</th>
-              <th className="px-4 py-2 text-left font-semibold">Gross Salary (VND)</th>
-              <th className="px-4 py-2 text-left font-semibold">Approved Salary (VND)</th>
-              <th className="px-4 py-2 text-left font-semibold">Gross Salary (USD)</th>
-              <th className="px-4 py-2 text-left font-semibold">Approved Salary (USD)</th>
-              <th className="px-4 py-2 text-left font-semibold">Approved Salary USD Equiv</th>
-              <th className="px-4 py-2 text-left font-semibold">Created At</th>
-              <th className="px-4 py-2 text-left font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="w-full min-w-full text-sm">
+          <TableHeader className="bg-muted">
+            <TableRow>
+              <TableHead className="px-4 py-2"><input type="checkbox" checked={allSelected} onChange={toggleSelectAll} /></TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">ID</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold min-w-[10rem]">Staff</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold min-w-[10rem]">Project</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Month</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Gross Salary (VND)</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Approved Salary (VND)</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Gross Salary (USD)</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Approved Salary (USD)</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Approved Salary USD Equiv</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Created At</TableHead>
+              <TableHead className="px-4 py-2 text-left font-semibold">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {salaries.map((salary: any) => (
-              <tr key={salary.id} className="border-t">
-                <td className="px-4 py-2">
+              <TableRow key={salary.id} className="border-t">
+                <TableCell className="px-4 py-2">
                   <input
                     type="checkbox"
                     checked={selected.includes(String(salary.id))}
                     onChange={() => toggleSelect(String(salary.id))}
                   />
-                </td>
-                <td className="px-4 py-2">{salary.id}</td>
-                <td className="px-4 py-2">
+                </TableCell>
+                <TableCell className="px-4 py-2">{salary.id}</TableCell>
+                <TableCell className="px-4 py-2">
                   {salary.staff?.full_name ? (
                     <Link href={`/dashboard/staffs/${salary.staff.id}`} className="text-primary hover:underline hover:opacity-80">
                       {salary.staff.full_name}
@@ -180,8 +188,8 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
                   ) : (
                     salary.staff_id
                   )}
-                </td>
-                <td className="px-4 py-2">
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {salary.projects?.project_name ? (
                     <Link href={`/dashboard/projects/${salary.projects.id}`} className="text-primary hover:underline hover:opacity-80">
                       {salary.projects.project_name}
@@ -189,21 +197,21 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
                   ) : (
                     salary.project_id
                   )}
-                </td>
-                <td className="px-4 py-2">{salary.months?.month_start || salary.month_id}</td>
-                <td className="px-4 py-2">{salary.gross_salary_vnd}</td>
-                <td className="px-4 py-2">{salary.approved_salary_vnd}</td>
-                <td className="px-4 py-2">{salary.gross_salary_usd}</td>
-                <td className="px-4 py-2">{salary.approved_salary_usd}</td>
-                <td className="px-4 py-2">{salary.approved_salary_usd_equiv}</td>
-                <td className="px-4 py-2">{salary.created_at ? new Date(salary.created_at).toISOString().slice(0, 10) : '-'}</td>
-                <td className="px-4 py-2">
+                </TableCell>
+                <TableCell className="px-4 py-2">{salary.months?.month_start || salary.month_id}</TableCell>
+                <TableCell className="px-4 py-2">{salary.gross_salary_vnd}</TableCell>
+                <TableCell className="px-4 py-2">{salary.approved_salary_vnd}</TableCell>
+                <TableCell className="px-4 py-2">{salary.gross_salary_usd}</TableCell>
+                <TableCell className="px-4 py-2">{salary.approved_salary_usd}</TableCell>
+                <TableCell className="px-4 py-2">{salary.approved_salary_usd_equiv}</TableCell>
+                <TableCell className="px-4 py-2">{salary.created_at ? new Date(salary.created_at).toISOString().slice(0, 10) : '-'}</TableCell>
+                <TableCell className="px-4 py-2">
                   <Button size="sm" variant="outline" onClick={() => { setEditSalary(salary); setEditOpen(true); }}>Edit</Button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       {/* Edit Sheet */}
       <EditSalarySheet open={editOpen} onOpenChange={setEditOpen} salary={editSalary} months={months} updateSalaryAction={updateSalary as (formData: FormData) => Promise<{ success: boolean; error?: string }>} />
@@ -314,4 +322,4 @@ export function SalaryTableWithDuplicate({ salaries, months, projects, page, pag
       </Pagination>
     </div>
   );
-} 
+}
